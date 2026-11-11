@@ -1,0 +1,26 @@
+{# Import with:  {% import "_macros.html.j2" as m with context %} #}
+
+{% macro logo(extra_class="") -%}
+{% if ident.logo == "text" %}
+<div class="logo logo-text {{ extra_class }}"><span class="name">{{ v.name }}</span></div>
+{% else %}
+<div class="logo logo-{{ ident.logo }} {{ extra_class }}"><span class="mark">{{ ident.monogram }}</span><span class="name">{{ v.name }}</span></div>
+{% endif %}
+{%- endmacro %}
+
+{# "/ 100 Stk." for per-100 prices, empty otherwise #}
+{% macro per_unit(p, prefix="/ ") -%}
+{% if p.price_unit != 1 %}{{ prefix }}{{ p.price_unit }} {{ p.unit.label }}{% endif %}
+{%- endmacro %}
+
+{% macro management_line() -%}
+{{ v.management.title }}: {{ v.management.names | join(", ") }}
+{%- endmacro %}
+
+{% macro delivery_block(label_class="label") -%}
+{% set d = q.delivery_address %}
+{% if d %}
+<span class="{{ label_class }}">{{ d.label }}:</span>
+{% if d.name %}{{ d.name }}, {% endif %}{{ d.address | address_lines | join(", ") }}
+{% endif %}
+{%- endmacro %}

@@ -1,0 +1,5 @@
+# Only needed for render_pdf.py / verify_pdf.py. The JSON generator itself uses the standard library only.
+# WeasyPrint also needs Pango >= 1.44 from the OS (Debian/Ubuntu: apt install libpango-1.0-0 libpangoft2-1.0-0).
+weasyprint==70.0
+Jinja2==3.1.6
+pypdf==7.0.1

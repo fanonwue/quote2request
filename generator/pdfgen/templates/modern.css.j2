@@ -1,0 +1,84 @@
+/* Modern web-app invoice look: Lato, accent colour, generous whitespace. */
+@page {
+  size: A4;
+  margin: 22mm 18mm 30mm 18mm;
+  @top-left { content: {{ v.name | css }}; font: 600 7.5pt Lato, "Helvetica Neue", "DejaVu Sans", sans-serif; color: {{ ident.accent }}; vertical-align: bottom; padding-bottom: 5mm; }
+  @top-right { content: {{ ("Angebot " ~ q.quote_number) | css }}; font: 7.5pt Lato, "Helvetica Neue", "DejaVu Sans", sans-serif; color: #888; vertical-align: bottom; padding-bottom: 5mm; }
+  @bottom-left { content: element(footer); vertical-align: top; padding-top: 5mm; width: 150mm; }
+  @bottom-right { content: "Seite " counter(page) " / " counter(pages); font: 7pt Lato, "DejaVu Sans", sans-serif; color: #888; vertical-align: top; padding-top: 5.5mm; }
+}
+@page :first {
+  margin-top: 14mm;
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
+
+html { font-family: Lato, "Helvetica Neue", "DejaVu Sans", sans-serif; font-size: 9.3pt; line-height: 1.4; color: #222; }
+body { margin: 0; }
+p { margin: 0 0 2.2mm; }
+.muted { color: #888; }
+
+.footer { position: running(footer); display: flex; gap: 6mm; font-size: 6.6pt; color: #777; line-height: 1.45; }
+.footer .col { flex: 1 1 0; }
+.footer strong { color: #444; }
+
+.accent-bar { position: absolute; top: -14mm; left: -18mm; width: 210mm; height: 3.5mm; background: {{ ident.accent }}; }
+
+.top { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 4mm; }
+.logo { display: flex; align-items: center; gap: 3mm; }
+.logo .name { font-size: 14pt; font-weight: 700; color: #222; max-width: 95mm; line-height: 1.15; }
+.logo .mark { width: 13mm; height: 13mm; line-height: 13mm; text-align: center; font-weight: 900; font-size: 12pt;
+              color: #fff; background: {{ ident.accent }}; border-radius: 3mm; flex: none; }
+.logo-circle .mark { border-radius: 50%; }
+.logo-square .mark { border-radius: 0; }
+.logo-bar .mark { width: 2.5mm; border-radius: 0; color: transparent; overflow: hidden; }
+.logo-text .name { font-size: 17pt; font-weight: 300; letter-spacing: 0.3pt; color: {{ ident.accent }}; }
+.vendor-addr { text-align: right; font-size: 7.8pt; color: #666; line-height: 1.45; }
+
+.parties { display: flex; justify-content: space-between; margin-top: 9mm; }
+.to { width: 85mm; font-size: 9.5pt; line-height: 1.35; }
+.to .sender { font-size: 6.5pt; color: #999; margin-bottom: 2mm; }
+.to .deliver { margin-top: 4mm; font-size: 8.5pt; color: #444; }
+.k { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.6pt; color: {{ ident.accent }}; font-weight: 700; margin-bottom: 0.6mm; }
+
+dl.meta { width: 72mm; margin: 0; display: grid; grid-template-columns: 30mm 1fr; row-gap: 0.4mm; font-size: 8pt; }
+dl.meta dt { color: #888; }
+dl.meta dd { margin: 0; font-weight: 600; }
+dl.meta dd.muted { font-weight: normal; }
+dl.meta .sep { margin-top: 2.5mm; }
+
+h1 { font-size: 22pt; font-weight: 300; margin: 7mm 0 0; color: #222; }
+h1 .nr { font-weight: 700; color: {{ ident.accent }}; }
+.subject { font-size: 11pt; color: #555; margin: 0 0 5mm; }
+.intro { margin-bottom: 5mm; }
+h1 + .intro { margin-top: 4mm; }
+
+table.positions { width: 100%; border-collapse: collapse; font-size: 8.6pt; table-layout: fixed; }
+.positions thead th { background: {{ ident.accent }}; color: #fff; font-weight: 700; text-align: left; padding: 2mm 1.6mm; font-size: 7.8pt; }
+.positions th.num, .positions td.num { text-align: right; }
+.positions td { padding: 2mm 1.6mm; vertical-align: top; }
+.positions tr { break-inside: avoid; }
+.positions tr.even td { background: #f4f5f7; }
+.positions .pos { width: 9mm; color: #888; }
+.positions .qty { width: 22mm; } .positions .price { width: 25mm; } .positions .disc { width: 14mm; }
+.positions .tax { width: 11mm; } .positions .total { width: 25mm; }
+.positions td.num { white-space: nowrap; }
+.positions .title { font-weight: 600; }
+.positions .long { color: #555; font-size: 8pt; margin-top: 0.6mm; }
+.positions .art, .positions .pe { color: #999; font-size: 7.2pt; margin-top: 0.4mm; }
+.positions tr.optional td { color: #888; }
+.badge { display: inline-block; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4pt;
+         color: {{ ident.accent }}; border: 0.6pt solid {{ ident.accent }}; border-radius: 1.5mm; padding: 0 1.2mm; }
+.note { font-size: 7.5pt; color: #888; margin-top: 1.5mm; }
+
+.summary { display: flex; justify-content: flex-end; margin-top: 4mm; break-inside: avoid; }
+table.totals { width: 88mm; border-collapse: collapse; font-size: 9pt; background: #f4f5f7; }
+.totals th { text-align: left; font-weight: normal; padding: 1.2mm 3mm; }
+.totals td { text-align: right; padding: 1.2mm 3mm; white-space: nowrap; }
+.totals tr:first-child th, .totals tr:first-child td { padding-top: 3mm; }
+.totals tr.grand th, .totals tr.grand td { background: {{ ident.accent }}; color: #fff; font-weight: 700; font-size: 10.5pt; padding: 2.5mm 3mm; }
+
+.terms { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; margin-top: 6mm; font-size: 8.5pt; break-inside: avoid; }
+.closing { margin-top: 6mm; break-inside: avoid; }
+.closing .signature { margin-top: 6mm; font-weight: 600; }
+.closing .signature .muted { font-weight: normal; font-size: 8pt; }

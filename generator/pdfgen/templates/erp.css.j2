@@ -1,0 +1,67 @@
+/* ERP document printout: monospace, ruled boxes, every field labelled, compact header on follow-up pages. */
+@page {
+  size: A4;
+  margin: 24mm 12mm 30mm 18mm;
+  @top-left { content: {{ ("ANGEBOT " ~ q.quote_number ~ "  vom " ~ (q.quote_date | de_date) ~ "  Kd-Nr. " ~ (q.customer_number or "-")) | css }};
+              font: 7.5pt "Courier New", "Liberation Mono", "DejaVu Sans Mono", monospace; vertical-align: bottom; padding-bottom: 3mm; }
+  @top-right { content: "Seite " counter(page) " von " counter(pages);
+               font: 7.5pt "Courier New", "Liberation Mono", "DejaVu Sans Mono", monospace; vertical-align: bottom; padding-bottom: 3mm; }
+  @bottom-center { content: element(footer); vertical-align: top; padding-top: 3mm; }
+}
+@page :first {
+  margin-top: 12mm;
+  @top-left { content: none; }
+  @top-right { content: "Seite " counter(page) " von " counter(pages); padding-bottom: 1mm; }
+}
+
+html { font-family: "Courier New", "Liberation Mono", "DejaVu Sans Mono", monospace; font-size: 7.8pt; line-height: 1.3; color: #000; }
+body { margin: 0; }
+p { margin: 0 0 1.6mm; }
+
+.footer { position: running(footer); width: 180mm; }
+.footer table { width: 100%; border-collapse: collapse; border-top: 0.6pt solid #000; font-size: 6.3pt; line-height: 1.3; }
+.footer td { vertical-align: top; padding: 1.5mm 2mm 0 0; }
+.footer .nowrap { white-space: nowrap; }
+
+.head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.5pt solid {{ ident.accent }}; padding-bottom: 2mm; }
+.head .vname { font-size: 12pt; font-weight: bold; color: {{ ident.accent }}; font-family: "DejaVu Sans", Arial, sans-serif; }
+.head .vendor { font-size: 7pt; }
+.doctitle { font-size: 16pt; font-weight: bold; letter-spacing: 3pt; }
+
+.block { display: flex; justify-content: space-between; margin-top: 8mm; }
+.addr { width: 85mm; height: 40mm; font-size: 9pt; line-height: 1.3; }
+.addr .return { font-size: 6pt; text-decoration: underline; margin-bottom: 2.5mm; }
+
+table.grid { border-collapse: collapse; font-size: 7.5pt; }
+.block table.grid { width: 88mm; }
+table.grid th, table.grid td { border: 0.5pt solid #000; padding: 0.7mm 1.5mm; vertical-align: top; text-align: left; }
+table.grid th { font-weight: normal; background: #e8e8e8; white-space: nowrap; width: 28mm; }
+table.grid td { font-weight: bold; }
+table.wide { width: 100%; margin-top: 2mm; }
+table.conditions { margin-top: 5mm; break-inside: avoid; }
+table.conditions td { font-weight: normal; }
+
+.intro { margin: 5mm 0 3mm; }
+
+table.positions { width: 100%; border-collapse: collapse; font-size: 7.5pt; }
+.positions thead th { border-top: 0.8pt solid #000; border-bottom: 0.8pt solid #000; background: #e8e8e8; padding: 1mm; text-align: left; font-weight: bold; }
+.positions th.num, .positions td.num { text-align: right; }
+.positions td { padding: 1mm 1mm 0.4mm; vertical-align: top; }
+.positions tbody.item { break-inside: avoid; }
+.positions tbody.item td { border-bottom: 0.3pt dashed #777; }
+.positions tbody.item tr:not(:last-child) td { border-bottom: none; }
+.positions tr.sub td { padding-top: 0; padding-bottom: 1mm; font-size: 7pt; }
+.positions td.num, .positions td.pos, .positions td.art { white-space: nowrap; }
+.positions .st { text-align: center; width: 5mm; }
+.positions tr.optional td { font-style: italic; }
+
+.totals-wrap { display: flex; justify-content: flex-end; margin-top: 3mm; break-inside: avoid; }
+table.totals { border-collapse: collapse; font-size: 8pt; min-width: 105mm; }
+.totals th { text-align: left; font-weight: normal; padding: 0.5mm 2mm 0.5mm 0; }
+.totals td { text-align: right; padding: 0.5mm 1mm; white-space: nowrap; }
+.totals tr.line th, .totals tr.line td { border-top: 0.5pt solid #000; }
+.totals tr.grand th, .totals tr.grand td { border-top: 0.8pt solid #000; border-bottom: 0.8pt solid #000; font-weight: bold; font-size: 9pt; padding: 1mm; }
+
+.legend { font-size: 6.5pt; margin-top: 3mm; }
+.closing { margin-top: 6mm; break-inside: avoid; }
+.closing .machine { font-size: 6.5pt; margin-top: 4mm; }

@@ -1,0 +1,83 @@
+/* DIN 5008 form B. Page coordinates: left margin 25 mm, address window at 20/45 mm (85 x 45 mm),
+   info block at 125/50 mm, fold marks at 105 / 210 mm, hole mark at 148.5 mm. */
+@page {
+  size: A4;
+  margin: 27mm 20mm 34mm 25mm;
+  @top-left { content: {{ v.name | css }}; font: 7.5pt Arial, Helvetica, "Liberation Sans", "DejaVu Sans", sans-serif; color: #666; vertical-align: bottom; padding-bottom: 4mm; }
+  @top-right { content: {{ ("Angebot " ~ q.quote_number ~ " vom " ~ (q.quote_date | de_date)) | css }}; font: 7.5pt Arial, Helvetica, "Liberation Sans", "DejaVu Sans", sans-serif; color: #666; vertical-align: bottom; padding-bottom: 4mm; }
+  @bottom-center { content: element(footer); vertical-align: top; padding-top: 4mm; }
+  @bottom-right-corner { content: counter(page) "/" counter(pages); font: 7pt Arial, Helvetica, "DejaVu Sans", sans-serif; color: #666; vertical-align: top; padding-top: 4mm; text-align: center; }
+}
+@page :first {
+  margin-top: 0;
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
+
+html { font-family: Arial, Helvetica, "Liberation Sans", "DejaVu Sans", sans-serif; font-size: 9.5pt; line-height: 1.35; color: #111; }
+body { margin: 0; }
+p { margin: 0 0 2.5mm; }
+
+.footer { position: running(footer); display: flex; gap: 4mm; font-size: 6.6pt; line-height: 1.35; color: #444;
+          border-top: 0.4pt solid #999; padding-top: 1.8mm; width: 165mm; }
+.footer .col { flex: 1 1 0; }
+.footer .col:nth-child(3) { flex-grow: 1.2; } .footer .col:nth-child(4) { flex-grow: 1.25; }
+.footer .nowrap { white-space: nowrap; }
+
+.first-page { position: relative; height: 98mm; }
+.fold { position: absolute; left: -20mm; width: 4mm; border-top: 0.4pt solid #888; }
+.fold-1 { top: 105mm; } .fold-2 { top: 210mm; } .fold-hole { top: 148.5mm; width: 6mm; left: -21mm; }
+
+.letterhead { position: absolute; top: 12mm; right: 0; width: 135mm; text-align: right; }
+.logo { display: flex; align-items: center; justify-content: flex-end; gap: 3mm; }
+.logo .name { font-size: {{ "15pt" if v.name | length < 34 else "12.5pt" }}; font-weight: bold; color: {{ ident.accent }}; letter-spacing: 0.2pt; }
+.logo .mark { display: inline-block; width: 12mm; height: 12mm; line-height: 12mm; text-align: center;
+              background: {{ ident.accent }}; color: #fff; font-weight: bold; font-size: 13pt; }
+.logo-circle .mark { border-radius: 50%; }
+.logo-bar .mark { width: 3mm; color: transparent; overflow: hidden; }
+.logo-text .name { font-size: 17pt; text-transform: uppercase; }
+
+.window { position: absolute; left: -5mm; top: 45mm; width: 85mm; height: 45mm; }
+.window .return { position: absolute; bottom: 27.8mm; left: 5mm; right: 2mm; font-size: 6pt; line-height: 1.2; color: #555;
+                  border-bottom: 0.3pt solid #999; padding-bottom: 0.5mm; }
+.window .recipient { position: absolute; top: 17.7mm; left: 5mm; right: 5mm; font-size: 10pt; line-height: 1.3; }
+
+.info { position: absolute; left: 100mm; top: 50mm; width: 65mm; border-collapse: collapse; font-size: 8pt; }
+.info th { text-align: left; font-weight: normal; color: #555; padding: 0 2mm 0 0; white-space: nowrap; vertical-align: top; }
+.info td { padding: 0; }
+.info tr.gap th, .info tr.gap td { padding-top: 2.2mm; }
+
+.subject { font-size: 11pt; font-weight: bold; margin: 0 0 3mm; }
+.subject span { font-weight: normal; }
+.delivery { font-size: 9pt; }
+.label { font-weight: bold; }
+.intro { margin: 5mm 0 4mm; }
+
+table.positions { width: 100%; border-collapse: collapse; font-size: 8.5pt; table-layout: fixed; }
+.positions th.num { text-align: right; }
+.positions th.qty { width: 10mm; } .positions th.price { width: 17mm; } .positions th.disc { width: 10mm; }
+.positions th.tax { width: 8mm; } .positions th.total { width: 18mm; }
+.positions thead th { border-top: 0.8pt solid #111; border-bottom: 0.8pt solid #111; padding: 1.4mm 0.8mm; text-align: left; font-weight: bold; }
+.positions td { padding: 1.4mm 0.8mm; border-bottom: 0.3pt solid #bbb; vertical-align: top; }
+.positions tr { break-inside: avoid; }
+.positions td.num { text-align: right; white-space: nowrap; }
+.positions .pos { width: 7mm; }
+.positions .art { width: 14mm; }
+.positions .unit { width: 11mm; padding-left: 1.6mm; }
+.positions .long { font-size: 7.8pt; color: #333; margin-top: 0.6mm; }
+.positions .opt { font-size: 7.5pt; font-style: italic; margin-top: 0.6mm; }
+.positions .pe { font-size: 7pt; color: #444; }
+.positions tr.optional td { color: #444; }
+
+table.totals { margin: 3mm 0 0 auto; width: 92mm; border-collapse: collapse; break-inside: avoid; font-size: 9pt; }
+.totals th { text-align: left; font-weight: normal; padding: 0.7mm 2mm 0.7mm 0; }
+.totals td { text-align: right; padding: 0.7mm 1mm; white-space: nowrap; }
+.totals tr.sub th, .totals tr.sub td { border-top: 0.4pt solid #111; }
+.totals tr.grand th, .totals tr.grand td { font-weight: bold; border-top: 0.8pt solid #111; border-bottom: 2pt double #111; padding: 1.2mm 1mm; }
+
+.terms { margin-top: 7mm; break-inside: avoid; }
+.terms p { margin-bottom: 1.2mm; }
+.closing { margin-top: 5mm; break-inside: avoid; }
+.closing .company { margin-top: 2mm; }
+.closing .signature { margin-top: 10mm; }
+.closing .signature span { font-size: 8.5pt; color: #444; }

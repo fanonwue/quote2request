@@ -1,0 +1,121 @@
+{% extends "_base.html.j2" %}
+{% import "_macros.html.j2" as m with context %}
+{% block creator %}Kontor Warenwirtschaft 7.4 (Briefvorlage DIN 5008 B){% endblock %}
+{% block css %}{% include "din5008.css.j2" %}{% endblock %}
+{% block body %}
+
+{# Running elements must come first so they are available on page 1. #}
+<div class="footer">
+  <div class="col">
+    <strong>{{ v.name }}</strong><br>
+    {{ vendor_address | join("<br>"|safe) }}
+  </div>
+  <div class="col">
+    Tel. {{ v.phone }}<br>
+    {% if v.fax %}Fax {{ v.fax }}<br>{% endif %}
+    {{ v.email }}<br>
+    {{ v.website }}
+  </div>
+  <div class="col">
+    {{ v.commercial_register.court }}, {{ v.commercial_register.number }}<br>
+    {{ m.management_line() }}<br>
+    USt-IdNr. {{ v.vat_id }}{% if v.tax_number %}<br>St.-Nr. {{ v.tax_number }}{% endif %}
+  </div>
+  <div class="col">
+    {{ v.bank_account.bank_name }}<br>
+    <span class="nowrap">IBAN {{ v.bank_account.iban | batch(4) | map("join") | join(" ") }}</span><br>
+    BIC {{ v.bank_account.bic }}
+  </div>
+</div>
+
+<div class="first-page">
+  <div class="fold fold-1"></div><div class="fold fold-hole"></div><div class="fold fold-2"></div>
+  <div class="letterhead">{{ m.logo() }}</div>
+
+  <div class="window">
+    <div class="return">{{ sender_line }}</div>
+    <div class="recipient">
+      {% for line in recipient_classic %}<div>{{ line }}</div>{% endfor %}
+    </div>
+  </div>
+
+  <table class="info">
+    {% if q.customer_reference %}<tr><th>Ihr Zeichen</th><td>{{ q.customer_reference }}</td></tr>{% endif %}
+    {% if q.inquiry_date %}<tr><th>Ihre Nachricht vom</th><td>{{ q.inquiry_date | de_date }}</td></tr>{% endif %}
+    {% if q.customer_number %}<tr><th>Kunden-Nr.</th><td>{{ q.customer_number }}</td></tr>{% endif %}
+    <tr><th>Angebots-Nr.</th><td>{{ q.quote_number }}</td></tr>
+    <tr class="gap"><th>Ansprechpartner</th><td>{{ contact.salutation }} {{ contact_name }}</td></tr>
+    {% if contact.role %}<tr><th></th><td>{{ contact.role }}</td></tr>{% endif %}
+    {% if contact.phone %}<tr><th>Telefon</th><td>{{ contact.phone }}</td></tr>{% endif %}
+    {% if contact.mobile %}<tr><th>Mobil</th><td>{{ contact.mobile }}</td></tr>{% endif %}
+    {% if contact.email %}<tr><th>E-Mail</th><td>{{ contact.email }}</td></tr>{% endif %}
+    <tr class="gap"><th>Datum</th><td>{{ letter_date }}</td></tr>
+  </table>
+</div>
+
+<h1 class="subject">Angebot Nr. {{ q.quote_number }}{% if q.subject %}<br><span>{{ q.subject }}</span>{% endif %}</h1>
+{% if q.delivery_address %}<p class="delivery">{{ m.delivery_block() }}</p>{% endif %}
+
+<div class="intro">{{ q.intro_text | paragraphs }}</div>
+
+<table class="positions">
+  <thead>
+    <tr>
+      <th class="pos">Pos.</th>
+      {% if has_article %}<th class="art">Art.-Nr.</th>{% endif %}
+      <th class="desc">Bezeichnung</th>
+      <th class="num qty">Menge</th>
+      <th class="unit">Einheit</th>
+      <th class="num price">Einzelpreis {{ cur }}</th>
+      {% if has_discount %}<th class="num disc">Rabatt %</th>{% endif %}
+      {% if mixed_tax %}<th class="num tax">USt %</th>{% endif %}
+      <th class="num total">Gesamt {{ cur }}</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in q.positions %}
+    <tr class="{{ p.type }}">
+      <td class="pos">{{ p.position }}</td>
+      {% if has_article %}<td class="art">{{ p.article_number or "" }}</td>{% endif %}
+      <td class="desc">
+        {{ p.description }}
+        {% if p.long_description %}<div class="long">{{ p.long_description }}</div>{% endif %}
+        {% if p.type == "optional" %}<div class="opt">Optionale Position – nicht in der Summe enthalten</div>{% endif %}
+      </td>
+      <td class="num qty">{{ p.quantity | qty }}</td>
+      <td class="unit">{{ p.unit.label }}</td>
+      <td class="num">{{ p.unit_price | money }}{% if p.price_unit != 1 %}<div class="pe">{{ m.per_unit(p) }}</div>{% endif %}</td>
+      {% if has_discount %}<td class="num">{{ p.discount_percent | pct if p.discount_percent else "" }}</td>{% endif %}
+      {% if mixed_tax %}<td class="num">{{ p.tax_rate | pct }}</td>{% endif %}
+      <td class="num">{% if p.type == "optional" %}({{ p.total_price | money }}){% else %}{{ p.total_price | money }}{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<table class="totals">
+  {% if t.discount or t.shipping %}
+  <tr><th>Summe Positionen netto</th><td>{{ t.positions_net | money }} {{ cur }}</td></tr>
+  {% if t.discount %}<tr><th>abzgl. {{ t.discount.percent | pct }} % Rabatt</th><td>−{{ t.discount.amount | money }} {{ cur }}</td></tr>{% endif %}
+  {% if t.shipping %}<tr><th>zzgl. Versandkosten</th><td>{{ t.shipping | money }} {{ cur }}</td></tr>{% endif %}
+  {% endif %}
+  <tr class="sub"><th>Nettobetrag</th><td>{{ t.net_total | money }} {{ cur }}</td></tr>
+  {% for tax in t.tax %}
+  <tr><th>zzgl. {{ tax.rate | pct }} % USt{% if mixed_tax or t.shipping %} auf {{ tax.base | money }} {{ cur }}{% endif %}</th><td>{{ tax.amount | money }} {{ cur }}</td></tr>
+  {% endfor %}
+  <tr class="grand"><th>Gesamtbetrag</th><td>{{ t.gross_total | money }} {{ cur }}</td></tr>
+</table>
+
+<div class="terms">
+  <p><span class="label">Lieferzeit:</span> {{ q.delivery_time }}</p>
+  {% if q.delivery_terms %}<p><span class="label">Lieferung:</span> {{ q.delivery_terms }}</p>{% endif %}
+  <p><span class="label">Zahlung:</span> {{ q.payment_terms.text }}</p>
+  <p>Unser Angebot ist gültig bis zum {{ q.valid_until | de_date }}.</p>
+</div>
+
+<div class="closing">
+  {{ q.closing_text | paragraphs }}
+  <p class="company">{{ v.name }}</p>
+  <p class="signature">{{ contact_name }}{% if contact.role %}<br><span>{{ contact.role }}</span>{% endif %}</p>
+</div>
+{% endblock %}

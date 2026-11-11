@@ -1,0 +1,118 @@
+{% extends "_base.html.j2" %}
+{% import "_macros.html.j2" as m with context %}
+{% block creator %}HandwerkPlus 2025 – Angebot/LV{% endblock %}
+{% block css %}{% include "lv.css.j2" %}{% endblock %}
+{% block body %}
+
+<div class="footer">
+  <div>{{ v.name }} · {{ vendor_address | join(" · ") }} · Tel. {{ v.phone }}{% if v.fax %} · Fax {{ v.fax }}{% endif %}</div>
+  <div>{{ v.email }} · {{ v.website }}</div>
+  <div>{{ m.management_line() }} · {{ v.commercial_register.court }} {{ v.commercial_register.number }} · USt-IdNr. {{ v.vat_id }}{% if v.tax_number %} · Steuernummer {{ v.tax_number }}{% endif %}</div>
+  <div>Bankverbindung: {{ v.bank_account.bank_name }} · IBAN {{ v.bank_account.iban | batch(4) | map("join") | join(" ") }} · BIC {{ v.bank_account.bic }}</div>
+</div>
+
+<header class="letterhead">
+  <div class="vname">{{ v.name }}</div>
+  <div class="rule"></div>
+  <div class="vline">{{ vendor_address | join(" · ") }} · Telefon {{ v.phone }} · {{ v.website }}</div>
+</header>
+
+<section class="head">
+  <div class="addr">
+    <div class="return">{{ sender_line }}</div>
+    {% for line in recipient_classic %}<div>{{ line }}</div>{% endfor %}
+  </div>
+  <table class="meta">
+    <tr><td>Angebot Nr.</td><td><strong>{{ q.quote_number }}</strong></td></tr>
+    <tr><td>Datum</td><td>{{ letter_date }}</td></tr>
+    {% if q.customer_number %}<tr><td>Kunden-Nr.</td><td>{{ q.customer_number }}</td></tr>{% endif %}
+    {% if q.customer_reference %}<tr><td>Ihr Zeichen</td><td>{{ q.customer_reference }}</td></tr>{% endif %}
+    {% if q.inquiry_date %}<tr><td>Ihre Anfrage</td><td>{{ q.inquiry_date | de_date }}</td></tr>{% endif %}
+    <tr><td>Bearbeiter/in</td><td>{{ contact_name }}</td></tr>
+    {% if contact.role %}<tr><td></td><td>{{ contact.role }}</td></tr>{% endif %}
+    {% if contact.phone %}<tr><td>Durchwahl</td><td>{{ contact.phone }}</td></tr>{% endif %}
+    {% if contact.mobile %}<tr><td>Mobil</td><td>{{ contact.mobile }}</td></tr>{% endif %}
+    {% if contact.email %}<tr><td>E-Mail</td><td>{{ contact.email }}</td></tr>{% endif %}
+  </table>
+</section>
+
+<h1>Angebot</h1>
+<table class="project">
+  {% if q.subject %}<tr><th>Betreff:</th><td>{{ q.subject }}</td></tr>{% endif %}
+  {% if q.delivery_address %}
+  {% set d = q.delivery_address %}
+  <tr><th>{{ d.label }}:</th><td>{% if d.name %}{{ d.name }}, {% endif %}{{ d.address | address_lines | join(", ") }}</td></tr>
+  {% endif %}
+</table>
+
+<div class="intro">{{ q.intro_text | paragraphs }}</div>
+
+<table class="lv">
+  <thead>
+    <tr>
+      <th class="oz">OZ</th>
+      <th class="num qty">Menge</th>
+      <th class="unit">Einh.</th>
+      <th class="text">Leistungsbeschreibung</th>
+      <th class="num ep">EP {{ cur }}</th>
+      <th class="num gp">GP {{ cur }}</th>
+    </tr>
+  </thead>
+  {% for p in q.positions %}
+  <tbody class="item {{ p.type }}">
+    <tr>
+      <td class="oz">{{ p.position }}</td>
+      <td class="num qty">{{ p.quantity | qty(2) }}</td>
+      <td class="unit">{{ p.unit.label }}</td>
+      <td class="text">
+        {% if p.type == "optional" %}<div class="kind">Bedarfsposition</div>{% endif %}
+        <div class="short">{{ p.description }}</div>
+        {% if p.long_description %}<div class="long">{{ p.long_description }}</div>{% endif %}
+        <div class="facts">
+          {%- if p.article_number %}Art.-Nr. {{ p.article_number }}{% endif %}
+          {%- if p.price_unit != 1 %}{% if p.article_number %} · {% endif %}Preis je {{ p.price_unit }} {{ p.unit.label }}{% endif %}
+          {%- if p.discount_percent %}{% if p.article_number or p.price_unit != 1 %} · {% endif %}abzgl. {{ p.discount_percent | pct }} % Nachlass auf EP{% endif %}
+          {%- if mixed_tax %}{% if p.article_number or p.price_unit != 1 or p.discount_percent %} · {% endif %}MwSt. {{ p.tax_rate | pct }} %{% endif %}
+        </div>
+      </td>
+      <td class="num ep">{{ p.unit_price | money }}</td>
+      <td class="num gp">{% if p.type == "optional" %}<span class="bp">({{ p.total_price | money }})</span>{% else %}{{ p.total_price | money }}{% endif %}</td>
+    </tr>
+  </tbody>
+  {% endfor %}
+</table>
+{% if has_optional %}<p class="note">Bedarfspositionen werden nur nach gesonderter Anordnung ausgeführt; ihr Gesamtpreis (in Klammern) ist in der Angebotssumme nicht enthalten.</p>{% endif %}
+
+<table class="totals">
+  <tr><th>Summe der Positionen netto</th><td>{{ t.positions_net | money }} {{ cur }}</td></tr>
+  {% if t.discount %}<tr><th>abzüglich {{ t.discount.percent | pct }} % Nachlass</th><td>– {{ t.discount.amount | money }} {{ cur }}</td></tr>{% endif %}
+  {% if t.shipping %}<tr><th>zuzüglich Anfahrt/Versand</th><td>{{ t.shipping | money }} {{ cur }}</td></tr>{% endif %}
+  {% if t.discount or t.shipping %}<tr class="line"><th>Angebotssumme netto</th><td>{{ t.net_total | money }} {{ cur }}</td></tr>{% endif %}
+  {% for tax in t.tax %}
+  <tr><th>zuzüglich {{ tax.rate | pct }} % MwSt. aus {{ tax.base | money }} {{ cur }}</th><td>{{ tax.amount | money }} {{ cur }}</td></tr>
+  {% endfor %}
+  <tr class="grand"><th>Angebotssumme brutto</th><td>{{ t.gross_total | money }} {{ cur }}</td></tr>
+</table>
+
+<div class="conditions">
+  <p><em>Ausführungszeitraum / Lieferzeit:</em> {{ q.delivery_time }}</p>
+  {% if q.delivery_terms %}<p><em>Lieferbedingungen:</em> {{ q.delivery_terms }}</p>{% endif %}
+  <p><em>Zahlungsbedingungen:</em> {{ q.payment_terms.text }}</p>
+  <p><em>Bindefrist:</em> An dieses Angebot halten wir uns bis zum {{ q.valid_until | de_date(true) }} gebunden.</p>
+</div>
+
+<div class="closing">
+  {{ q.closing_text | paragraphs }}
+  <p class="signature">{{ contact_name }}<br><span>{{ v.name }}</span></p>
+</div>
+
+<div class="acceptance">
+  <div class="title">Auftragserteilung</div>
+  <p>Hiermit erteilen wir den Auftrag gemäß Angebot Nr. {{ q.quote_number }} vom {{ q.quote_date | de_date }}
+     über {{ t.gross_total | money }} {{ cur }} brutto zu den genannten Bedingungen.</p>
+  <div class="sign">
+    <div><span></span>Ort, Datum</div>
+    <div><span></span>Unterschrift / Stempel Auftraggeber</div>
+  </div>
+</div>
+{% endblock %}

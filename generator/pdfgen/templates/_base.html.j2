@@ -1,0 +1,19 @@
+{# Shared skeleton. Child templates set `css` / `creator` and fill the `body` block. #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Angebot {{ q.quote_number }}</title>
+<meta name="author" content="{{ v.name }}">
+<meta name="description" content="Angebot {{ q.quote_number }}{% if q.subject %} – {{ q.subject }}{% endif %}">
+<meta name="generator" content="{% block creator %}{% endblock %}">
+<meta name="dcterms.created" content="{{ q.quote_date }}T08:00:00+01:00">
+<meta name="dcterms.modified" content="{{ q.quote_date }}T08:00:00+01:00">
+<style>
+{% block css %}{% endblock %}
+</style>
+</head>
+<body class="tpl-{{ ident.template }}">
+{% block body %}{% endblock %}
+</body>
+</html>
